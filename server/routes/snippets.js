@@ -128,7 +128,8 @@ router.post('/compile', verifyToken, async (req, res) => {
     const apiKey = process.env.JUDGE0_RAPIDAPI_KEY;
     const apiHost = process.env.JUDGE0_RAPIDAPI_HOST;
 
-    const url = `${apiURL}/submissions?wait=true`;
+    // Use Base64 encoding for robust character transfer on the wire
+    const url = `${apiURL}/submissions?wait=true&base64_encoded=true`;
 
     const headers = {
       'Content-Type': 'application/json'
@@ -145,13 +146,47 @@ router.post('/compile', verifyToken, async (req, res) => {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        source_code: code,
+        source_code: Buffer.from(code).toString('base64'),
         language_id: languageId,
-        stdin: stdin || ''
+        stdin: Buffer.from(stdin || '').toString('base64')
       })
     });
 
-    const data = await response.json();
+    let data = await response.json();
+
+    // Check if compilation is queued (async mode fallback)
+    if (data.token && (!data.status || data.status.id <= 2)) {
+      const token = data.token;
+      const getUrl = `${apiURL}/submissions/${token}?base64_encoded=true`;
+      
+      let attempts = 0;
+      const maxAttempts = 15;
+      
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const pollResponse = await fetch(getUrl, { method: 'GET', headers });
+        const pollData = await pollResponse.json();
+        
+        if (pollData.status && pollData.status.id > 2) {
+          data = pollData;
+          break;
+        }
+        attempts++;
+      }
+    }
+
+    // Decode Base64 fields back to plain text for the client
+    const decodeBase64 = (str) => {
+      if (!str) return '';
+      return Buffer.from(str, 'base64').toString('utf8');
+    };
+
+    if (data.stdout) data.stdout = decodeBase64(data.stdout);
+    if (data.stderr) data.stderr = decodeBase64(data.stderr);
+    if (data.compile_output) data.compile_output = decodeBase64(data.compile_output);
+    if (data.message) data.message = decodeBase64(data.message);
+
     res.json(data);
   } catch (error) {
     console.error('Error proxying compilation:', error);
