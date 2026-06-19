@@ -62,6 +62,21 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Health Check Endpoint
+  if (req.url === '/health' || req.url === '/api/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: {
+        auth: authProc.exitCode === null ? 'up' : `down (exitCode: ${authProc.exitCode})`,
+        snippet: snippetProc.exitCode === null ? 'up' : `down (exitCode: ${snippetProc.exitCode})`,
+        collab: collabProc.exitCode === null ? 'up' : `down (exitCode: ${collabProc.exitCode})`
+      }
+    }));
+    return;
+  }
+
   // Routing conditions
   if (req.url.startsWith('/api/auth')) {
     proxy.web(req, res, { target: `http://127.0.0.1:${AUTH_PORT}` });
