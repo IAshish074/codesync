@@ -1,0 +1,33 @@
+{
+  "name": "codesync-distributed-server",
+  "version": "1.0.0",
+  "description": "Distributed Backend Microservices for CodeSync Collaborative Editor",
+  "main": "gateway.js",
+  "type": "module",
+  "scripts": {
+    "start": "node gateway.js",
+    "start:auth": "node services/auth-service/index.js",
+    "start:snippet": "node services/snippet-service/index.js",
+    "start:collab": "node services/collab-service/index.js",
+    "dev:auth": "nodemon services/auth-service/index.js",
+    "dev:snippet": "nodemon services/snippet-service/index.js",
+    "dev:collab": "nodemon services/collab-service/index.js",
+    "dev:all": "concurrently --kill-others \"npm run dev:auth\" \"npm run dev:snippet\" \"npm run dev:collab\""
+  },
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.1",
+    "redis": "^4.6.13",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.0"
+  }
+}
