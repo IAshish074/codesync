@@ -77,6 +77,16 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Root Path (Railway Health Check fallback)
+  if (req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'active',
+      message: 'CodeSync Distributed API Gateway is operational'
+    }));
+    return;
+  }
+
   // Routing conditions
   if (req.url.startsWith('/api/auth')) {
     proxy.web(req, res, { target: `http://127.0.0.1:${AUTH_PORT}` });
