@@ -1,6 +1,7 @@
 import express from 'express';
 import Snippet from '../models/Snippet.js';
 import RoomHistory from '../models/RoomHistory.js';
+import User from '../models/User.js';
 import { verifyToken } from './middleware.js';
 
 const router = express.Router();
