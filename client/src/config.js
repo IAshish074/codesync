@@ -1,8 +1,6 @@
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-// If VITE_BACKEND_URL env is set (e.g. on Vercel pointing to Railway), use it.
-// Otherwise, default to localhost Gateway (5000) or current host.
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || (isLocal ? 'http://localhost:5000' : `${window.location.protocol}//${window.location.host}`);
+// Point the frontend to your live, deployed Railway API Gateway.
+// You can also override this by setting the VITE_BACKEND_URL environment variable during build.
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://codesync-production-983a.up.railway.app';
 
 export const AUTH_SERVICE_URL = BASE_URL;
 export const SNIPPET_SERVICE_URL = BASE_URL;
